@@ -19,7 +19,9 @@ public class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    private static final String SECRET_KEY = "SECRETKEYFORTHISAPPSECRETKEYFORTHISAPP";
+    //private static final String SECRET_KEY = "======================TRANSPORTATIONSYSTEM=Spring===========================";
+
+    private static final String SECRET_KEY = "GKDKGSLFKLF535LDSFJA6464KHJFLHKSDSLDK535253KLDFDKFLDF7575MCKJSKFJSKFFF6KSGGG";
     private static final int JWT_EXPIRATION_MS = 86400000;
 
 
@@ -62,7 +64,7 @@ public class JwtUtils {
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + JWT_EXPIRATION_MS))
-                .signWith(getSignInKey(),SignatureAlgorithm.HS512)
+                .signWith(getSignInKey(),SignatureAlgorithm.HS256)
                 .compact();
     }
 
