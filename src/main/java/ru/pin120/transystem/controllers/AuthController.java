@@ -1,15 +1,16 @@
 package ru.pin120.transystem.controllers;
 
 
-//import io.swagger.v3.oas.annotations.parameters.RequestBody;
-//import jakarta.validation.Valid;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.pin120.transystem.models.ERole;
 import ru.pin120.transystem.models.Role;
@@ -22,6 +23,7 @@ import ru.pin120.transystem.repositories.RoleRepository;
 import ru.pin120.transystem.repositories.UserRepository;
 import ru.pin120.transystem.security.jwt.JwtUtils;
 import ru.pin120.transystem.security.services.UserDetailsImpl;
+import ru.pin120.transystem.services.BindingService;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
+
 public class AuthController {
 
     @Autowired
@@ -49,14 +52,20 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Autowired
+    BindingService bindingService;
+
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest){
+    public ResponseEntity<?> registerUser(@RequestBody @Valid SignupRequest signupRequest, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            return ResponseEntity.badRequest().body(new MessageResponse(bindingService.getErrors(bindingResult)));
+        }
         if(userRepository.existsByUsername(signupRequest.getUsername())){
-            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: логин уже существует!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("логин уже существует!"));
         }
 
         if(userRepository.existsByEmail(signupRequest.getEmail())){
-            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: электронная почта уже используется!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("электронная почта уже используется!"));
         }
 
         User user = new User(signupRequest.getUsername(), signupRequest.getEmail(), encoder.encode(signupRequest.getPassword()));
@@ -66,7 +75,7 @@ public class AuthController {
 
         if(requiredRoles == null){
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Ошибка: роль USER не найдена"));
+                    .orElseThrow(() -> new RuntimeException("роль USER не найдена"));
 
             userRoles.add(userRole);
         }else{
@@ -74,21 +83,21 @@ public class AuthController {
                 switch (role) {
                     case "admin":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Ошибка: роль ADMIN не была найдена"));
+                                .orElseThrow(() -> new RuntimeException("роль ADMIN не была найдена"));
 
                         userRoles.add(adminRole);
                         break;
 
                     case "moderator":
                         Role moderatorRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Ошибка: роль MODERATOR не была найдена"));
+                                .orElseThrow(() -> new RuntimeException("роль MODERATOR не была найдена"));
 
                         userRoles.add(moderatorRole);
                         break;
 
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Ошибка: роль USER не была найдена"));
+                                .orElseThrow(() -> new RuntimeException("роль USER не была найдена"));
 
                         userRoles.add(userRole);
                 }
@@ -98,11 +107,15 @@ public class AuthController {
         user.setRoles(userRoles);
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("Пользователь успешно зарегистрирован!"));
+        return ResponseEntity.ok(new MessageResponse("пользователь успешно зарегистрирован!"));
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<?> authenticateUser(@RequestBody @Valid LoginRequest loginRequest,BindingResult bindingResult){
+
+        if(bindingResult.hasErrors()){
+            return ResponseEntity.badRequest().body(new MessageResponse(bindingService.getErrors(bindingResult)));
+        }
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));

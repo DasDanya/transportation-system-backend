@@ -6,12 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Getter;
+
 
 @Entity
 @NoArgsConstructor
@@ -28,17 +26,15 @@ public class User{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank
-    @Size(max=30)
+
+    @Column(length = 30, nullable = false)
     private String username;
 
-    @NotBlank
-    @Size(max = 50)
-    @Email
+    @Column(nullable = false)
     private String email;
 
-    @NotBlank
-    @Size(max = 50)
+
+    @Column(nullable = false)
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)
