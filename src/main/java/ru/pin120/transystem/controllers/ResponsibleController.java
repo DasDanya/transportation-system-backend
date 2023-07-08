@@ -1,6 +1,7 @@
 package ru.pin120.transystem.controllers;
 
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -8,13 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.pin120.transystem.exceptions.FileIsNotImageException;
 import ru.pin120.transystem.models.Responsible;
 import ru.pin120.transystem.payload.response.MessageResponse;
 import ru.pin120.transystem.services.BindingService;
 import ru.pin120.transystem.services.ResponsibleService;
 
 import java.util.List;
+
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -30,27 +31,41 @@ public class ResponsibleController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Responsible>> getAllResponsibles(){
-        List<Responsible> responsibles = responsibleService.findAllResponsibles();
+    public ResponseEntity<?> getAllResponsibles(){
+        List<Responsible> responsibles;
+        try {
+            responsibles = responsibleService.findAllResponsibles();
+        } catch(Exception e){
+            return ResponseEntity.internalServerError().body(new MessageResponse("не удалось получить список ответственных"));
+        }
 
         return new ResponseEntity<>(responsibles, HttpStatus.OK);
     }
 
-    /*@PostMapping("/add")
-    public ResponseEntity<?> addResponsible(@RequestBody @Valid Responsible responsible, BindingResult bindingResult){
-
-        if(bindingResult.hasErrors()) {
-            return new ResponseEntity<>(bindingService.getErrors(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-        try {
-            responsibleService.addResponsible(responsible);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(new MessageResponse("121"), HttpStatus.BAD_REQUEST);
+    @GetMapping("/delete/{id}")
+    public ResponseEntity<?> getDeleteResponsible(@PathVariable("id") int id){
+        Responsible responsible;
+        try{
+            responsible = responsibleService.findResponsibleById(id);
+        } catch (Exception e){
+            return new ResponseEntity(new MessageResponse(e.getMessage()), HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(new MessageResponse("Ответственный успешно добавлен!"),HttpStatus.CREATED);
-    }*/
+        return new ResponseEntity<>(responsible, HttpStatus.OK);
+    }
+
+    @DeleteMapping("delete/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteResponsible(@PathVariable("id") int id){
+        try{
+            responsibleService.deleteResponsible(id);
+        } catch (Exception e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+            //return new ResponseEntity<>(new MessageResponse("Ошибка удаления ответственного с id "+id+""),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(new MessageResponse("Ответственный успешно удален!"),HttpStatus.OK);
+    }
 
     @PostMapping("/add")
     public ResponseEntity<?> addResponsible(@RequestPart("responsible") @Valid Responsible responsible, BindingResult bindingResult,
@@ -67,7 +82,6 @@ public class ResponsibleController {
             if(e instanceof DataIntegrityViolationException){
                 errorMessage = "Введенный номер телефона принадлежит друкому ответственному";
             }
-            System.out.println(e.getClass());
             return new ResponseEntity<>(new MessageResponse(errorMessage), HttpStatus.NOT_FOUND);
         }
 
