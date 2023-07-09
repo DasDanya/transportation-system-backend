@@ -11,7 +11,6 @@ import ru.pin120.transystem.repositories.ResponsibleRepository;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,18 +22,6 @@ public class ResponsibleService {
     public ResponsibleService(ResponsibleRepository responsibleRepository, FileService fileService) {
         this.responsibleRepository = responsibleRepository;
         this.fileService = fileService;
-    }
-
-    public Responsible addResponsible(Responsible responsible, MultipartFile photo) throws Exception {
-
-        if(!fileService.fileIsImage(photo)){
-            throw new FileIsNotImageException("Данный файл не подходит для фотографии ответственного");
-        }
-
-        byte[] photoAsBytes = fileService.convertFile2Bytes(photo);
-        responsible.setPhoto(photoAsBytes);
-
-        return responsibleRepository.save(responsible);
     }
 
     public List<Responsible> findAllResponsibles(){
@@ -51,10 +38,31 @@ public class ResponsibleService {
                 .orElseThrow(() -> new ResponsibleNotFoundException("Ответственный с id "+id+" не был найден"));
     }
 
-    public Responsible updateResponsible(Responsible responsible){
+
+    public Responsible addResponsible(Responsible responsible, MultipartFile photo) throws Exception {
+
+        setPhotoResponsible(responsible,photo);
         return responsibleRepository.save(responsible);
     }
 
+    public Responsible updateResponsible(Responsible responsible, MultipartFile photo) throws Exception {
+
+        if(photo != null){
+            setPhotoResponsible(responsible,photo);
+        }
+
+        return responsibleRepository.save(responsible);
+    }
+
+
+    private void setPhotoResponsible(Responsible responsible,MultipartFile photo) throws Exception {
+        if(!fileService.fileIsImage(photo)){
+            throw new FileIsNotImageException("Данный файл не подходит для фотографии ответственного");
+        }
+
+        byte[] photoAsBytes = fileService.convertFile2Bytes(photo);
+        responsible.setPhoto(photoAsBytes);
+    }
 
 
     public void deleteResponsible(int id){

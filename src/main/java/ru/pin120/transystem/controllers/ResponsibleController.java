@@ -15,6 +15,7 @@ import ru.pin120.transystem.services.BindingService;
 import ru.pin120.transystem.services.ResponsibleService;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -44,6 +45,23 @@ public class ResponsibleController {
 
     @GetMapping("/delete/{id}")
     public ResponseEntity<?> getDeleteResponsible(@PathVariable("id") int id){
+        return findResponsibleById(id);
+    }
+
+    @DeleteMapping("delete/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteResponsible(@PathVariable("id") int id){
+        try{
+            responsibleService.deleteResponsible(id);
+        } catch (Exception e){
+            //return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new MessageResponse("Ошибка удаления ответственного с id "+id+""),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(new MessageResponse("Ответственный успешно удален!"),HttpStatus.OK);
+    }
+
+    private ResponseEntity<?> findResponsibleById(int id){
         Responsible responsible;
         try{
             responsible = responsibleService.findResponsibleById(id);
@@ -54,17 +72,35 @@ public class ResponsibleController {
         return new ResponseEntity<>(responsible, HttpStatus.OK);
     }
 
-    @DeleteMapping("delete/{id}")
-    @Transactional
-    public ResponseEntity<?> deleteResponsible(@PathVariable("id") int id){
-        try{
-            responsibleService.deleteResponsible(id);
-        } catch (Exception e){
-            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
-            //return new ResponseEntity<>(new MessageResponse("Ошибка удаления ответственного с id "+id+""),HttpStatus.INTERNAL_SERVER_ERROR);
+    @GetMapping("/update/{id}")
+    public ResponseEntity<?> getUpdateResponsible(@PathVariable("id") int id){
+       return findResponsibleById(id);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateResponsible(@RequestPart("responsible") @Valid Responsible responsible, BindingResult bindingResult,
+                                               @RequestPart(value = "photo",required = false) MultipartFile photo){
+
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(new MessageResponse(bindingService.getErrors(bindingResult)));
         }
 
-        return new ResponseEntity<>(new MessageResponse("Ответственный успешно удален!"),HttpStatus.OK);
+        try{
+            responsibleService.updateResponsible(responsible,photo);
+        }  catch (Exception e){
+            return handlingSaveException(e);
+        }
+
+        return new ResponseEntity<>(new MessageResponse("Данные об ответственном успешно обновлены!"),HttpStatus.OK);
+    }
+
+
+    private ResponseEntity<?> handlingSaveException(Exception exception){
+        String errorMessage = exception.getMessage();
+        if(exception instanceof DataIntegrityViolationException){
+            errorMessage = "Введенный номер телефона принадлежит другому ответственному";
+        }
+        return new ResponseEntity<>(new MessageResponse(errorMessage), HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("/add")
@@ -78,11 +114,7 @@ public class ResponsibleController {
             responsibleService.addResponsible(responsible,photo);
 
         } catch (Exception e) {
-            String errorMessage = e.getMessage();
-            if(e instanceof DataIntegrityViolationException){
-                errorMessage = "Введенный номер телефона принадлежит друкому ответственному";
-            }
-            return new ResponseEntity<>(new MessageResponse(errorMessage), HttpStatus.NOT_FOUND);
+            return handlingSaveException(e);
         }
 
         return new ResponseEntity<>(new MessageResponse("Ответственный успешно добавлен!"),HttpStatus.CREATED);
