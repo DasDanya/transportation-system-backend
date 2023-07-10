@@ -33,11 +33,33 @@ public class ResponsibleService {
                 .collect(Collectors.toList());
     }
 
+    public List<Responsible> findByField(String field, String value){
+        List<Responsible> responsibles;
+
+        switch(field){
+            case "surname":
+                responsibles = responsibleRepository.findResponsibleBySurname(value);
+                break;
+            case "name":
+                responsibles = responsibleRepository.findResponsibleByName(value);
+                break;
+            case "patronymic":
+                responsibles = responsibleRepository.findResponsibleByPatronymic(value);
+                break;
+            case "phone":
+                responsibles = responsibleRepository.findResponsibleByPhone(value);
+                break;
+            default:
+                responsibles = responsibleRepository.findAll();
+        }
+
+        return responsibles;
+    }
+
     public Responsible findResponsibleById(int id){
         return responsibleRepository.findResponsibleById(id)
                 .orElseThrow(() -> new ResponsibleNotFoundException("Ответственный с id "+id+" не был найден"));
     }
-
 
     public Responsible addResponsible(Responsible responsible, MultipartFile photo) throws Exception {
 

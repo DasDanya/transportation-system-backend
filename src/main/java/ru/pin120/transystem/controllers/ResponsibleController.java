@@ -15,7 +15,7 @@ import ru.pin120.transystem.services.BindingService;
 import ru.pin120.transystem.services.ResponsibleService;
 
 import java.util.List;
-import java.util.Optional;
+
 
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -32,10 +32,14 @@ public class ResponsibleController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllResponsibles(){
+    public ResponseEntity<?> getAllResponsibles(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
         List<Responsible> responsibles;
         try {
-            responsibles = responsibleService.findAllResponsibles();
+            if(field == null || value == null) {
+                responsibles = responsibleService.findAllResponsibles();
+            } else{
+                responsibles = responsibleService.findByField(field,value);
+            }
         } catch(Exception e){
             return ResponseEntity.internalServerError().body(new MessageResponse("не удалось получить список ответственных"));
         }
