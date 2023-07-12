@@ -1,6 +1,7 @@
 package ru.pin120.transystem.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 
@@ -36,4 +37,10 @@ public class Warehouse implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="responsible_id")
     private Responsible responsible;
+
+
+//    @JsonIgnore
+//    public Responsible getResponsible() {
+//        return responsible;
+//    }
 }

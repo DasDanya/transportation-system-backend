@@ -2,6 +2,7 @@ package ru.pin120.transystem.models;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import jakarta.validation.constraints.Pattern;
@@ -55,4 +56,9 @@ public class Responsible implements Serializable {
     //@JsonManagedReference
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "responsible")
     private Set<Warehouse> warehouses = new HashSet<>();
+
+    @JsonIgnore
+    public Set<Warehouse> getWarehouses() {
+        return warehouses;
+    }
 }

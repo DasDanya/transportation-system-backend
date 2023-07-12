@@ -78,10 +78,13 @@ public class ResponsibleService {
         }
     }
     private void removeInfiniteNesting(Responsible responsible){
-        Set<Warehouse> warehouses = responsible.getWarehouses();
-        for(Warehouse warehouse:warehouses){
-            warehouse.setResponsible(null);
-        }
+//        Set<Warehouse> warehouses = responsible.getWarehouses();
+//        for(Warehouse warehouse:warehouses){
+////            if(warehouse.getResponsible().equals(responsible)){
+////                warehouse.setResponsible(null);
+////            }
+//            warehouse.setResponsible(null);
+        //}
     }
 
     public void addResponsible(Responsible responsible, MultipartFile photo) throws Exception {

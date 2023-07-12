@@ -58,7 +58,6 @@ public class ResponsibleController {
         try{
             responsibleService.deleteResponsible(id);
         } catch (Exception e){
-            //return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
             return new ResponseEntity<>(new MessageResponse("Ошибка удаления ответственного с id "+id+""),HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -88,7 +87,6 @@ public class ResponsibleController {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(new MessageResponse(bindingService.getErrors(bindingResult)));
         }
-
         try{
             responsibleService.updateResponsible(responsible,photo);
         }  catch (Exception e){
