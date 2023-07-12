@@ -1,19 +1,18 @@
 package ru.pin120.transystem.models;
 
 
+
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-
 
 @Entity
 @Getter
@@ -24,7 +23,7 @@ import java.util.Set;
         uniqueConstraints = {
             @UniqueConstraint(columnNames = "phone")
         })
-public class Responsible {
+public class Responsible implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,8 +52,7 @@ public class Responsible {
     @Column(nullable = false)
     private byte[] photo;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "responsible")
+    //@JsonManagedReference
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "responsible")
     private Set<Warehouse> warehouses = new HashSet<>();
-
-
 }
