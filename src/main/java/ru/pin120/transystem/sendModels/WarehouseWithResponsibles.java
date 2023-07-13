@@ -15,7 +15,6 @@ import java.util.List;
 @Setter
 public class WarehouseWithResponsibles {
 
-    private int responsibleId;
     private Warehouse warehouse;
     private List<Responsible> responsibles;
 }

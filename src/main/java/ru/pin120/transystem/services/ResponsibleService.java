@@ -1,5 +1,9 @@
 package ru.pin120.transystem.services;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,6 +14,9 @@ import ru.pin120.transystem.models.Warehouse;
 import ru.pin120.transystem.repositories.ResponsibleRepository;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +41,7 @@ public class ResponsibleService {
                 .sorted(Comparator.comparing(Responsible::getSurname))
                 .collect(Collectors.toList());
 
-       removeInfiniteNesting(responsibles);
+       //removeInfiniteNesting(responsibles);
 
         return responsibles;
     }
@@ -58,7 +65,7 @@ public class ResponsibleService {
                 responsibles = responsibleRepository.findAll();
         }
 
-        removeInfiniteNesting(responsibles);
+        //removeInfiniteNesting(responsibles);
 
         return responsibles;
     }
@@ -67,7 +74,7 @@ public class ResponsibleService {
         Responsible responsible =  responsibleRepository.findResponsibleById(id)
                 .orElseThrow(() -> new ResponsibleNotFoundException("Ответственный с id "+id+" не был найден"));
 
-        removeInfiniteNesting(responsible);
+        //removeInfiniteNesting(responsible);
 
         return responsible;
     }
@@ -117,5 +124,46 @@ public class ResponsibleService {
         responsibleRepository.deleteResponsibleById(id);
     }
 
+    public ByteArrayInputStream generateReportInExcel(int id) {
+        Responsible responsible = findResponsibleById(id);
 
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Склады");
+        Row row = sheet.createRow(0);
+
+        row.createCell(0).setCellValue("Номер склада");
+        row.createCell(1).setCellValue("Субъект");
+        row.createCell(2).setCellValue("Город");
+        row.createCell(3).setCellValue("Улица");
+        row.createCell(4).setCellValue("Дом");
+
+        int rowIndex = 1;
+
+        List<Warehouse> warehouses = responsible.getWarehouses()
+                .stream()
+                .sorted(Comparator.comparing(Warehouse::getId)).
+                collect(Collectors.toList());
+
+        for(Warehouse warehouse: warehouses){
+            Row dataRow = sheet.createRow(rowIndex);
+
+            dataRow.createCell(0).setCellValue(warehouse.getId());
+            dataRow.createCell(1).setCellValue(warehouse.getAddress().getState());
+            dataRow.createCell(2).setCellValue(warehouse.getAddress().getCity());
+            dataRow.createCell(3).setCellValue(warehouse.getAddress().getStreet());
+            dataRow.createCell(4).setCellValue(warehouse.getAddress().getHouse());
+
+            rowIndex++;
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            workbook.write(out);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return new ByteArrayInputStream(out.toByteArray());
+    }
 }

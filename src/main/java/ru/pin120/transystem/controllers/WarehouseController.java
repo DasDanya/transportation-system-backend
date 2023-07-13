@@ -3,6 +3,7 @@ package ru.pin120.transystem.controllers;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -15,7 +16,6 @@ import ru.pin120.transystem.services.BindingService;
 import ru.pin120.transystem.services.ResponsibleService;
 import ru.pin120.transystem.services.WarehouseService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -77,12 +77,10 @@ public class WarehouseController {
     public ResponseEntity<?> getUpdateWarehouse(@PathVariable("id") int id){
         WarehouseWithResponsibles warehouseWithResponsibles;
         try{
-
-            Warehouse warehouse = warehouseService.findWarehouseById(id);
-            int responsibleId = warehouse.getResponsible() != null ? warehouse.getResponsible().getId() : 0;
             List<Responsible> responsibles = responsibleService.findAllResponsibles();
+            Warehouse warehouse = warehouseService.findWarehouseById(id);
 
-            warehouseWithResponsibles = new WarehouseWithResponsibles(responsibleId,warehouse,responsibles);
+            warehouseWithResponsibles = new WarehouseWithResponsibles(warehouse,responsibles);
 
         }catch (Exception e){
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -91,6 +89,27 @@ public class WarehouseController {
         return new ResponseEntity<>(warehouseWithResponsibles, HttpStatus.OK);
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<?> updateWarehouse(@RequestBody @Valid Warehouse warehouse, BindingResult bindingResult){
+        if(bindingResult.hasErrors()) {
+            return new ResponseEntity(new MessageResponse(bindingService.getErrors(bindingResult)), HttpStatus.BAD_REQUEST);
+        }
+        try{
+            warehouseService.saveWarehouse(warehouse);
+        } catch (Exception e){
+            return handlingSaveException(e);
+        }
+
+        return new ResponseEntity<>(new MessageResponse("Данные о складе успешно обновлены!"), HttpStatus.OK);
+    }
+
+    private ResponseEntity<?> handlingSaveException(Exception exception){
+        String errorMessage = exception.getMessage();
+        if(exception instanceof DataIntegrityViolationException){
+            errorMessage = "Уже имеется склад с таким адресом";
+        }
+        return new ResponseEntity<>(new MessageResponse(errorMessage), HttpStatus.NOT_FOUND);
+    }
 
     @GetMapping("/add")
     public ResponseEntity<?> getAddWarehouse(){
@@ -112,9 +131,9 @@ public class WarehouseController {
             return new ResponseEntity(new MessageResponse(bindingService.getErrors(bindingResult)), HttpStatus.BAD_REQUEST);
         }
         try{
-            warehouseService.addWarehouse(warehouse);
+            warehouseService.saveWarehouse(warehouse);
         }catch(Exception e){
-            return new ResponseEntity<>(new MessageResponse("Произошла ошибка добавления склада"), HttpStatus.INTERNAL_SERVER_ERROR);
+            handlingSaveException(e);
         }
 
         return new ResponseEntity<>(new MessageResponse("Склад успешно добавлен!"), HttpStatus.CREATED);

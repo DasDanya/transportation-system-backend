@@ -1,16 +1,15 @@
 package ru.pin120.transystem.services;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.pin120.transystem.exceptions.WarehouseNotFoundException;
-import ru.pin120.transystem.models.Responsible;
 import ru.pin120.transystem.models.Warehouse;
 import ru.pin120.transystem.repositories.WarehouseRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -32,7 +31,7 @@ public class WarehouseService {
                 .sorted(Comparator.comparing(Warehouse::getId).reversed())
                 .collect(Collectors.toList());
 
-       removeInfiniteNesting(warehouses);
+       //removeInfiniteNesting(warehouses);
 
         return warehouses;
     }
@@ -41,7 +40,7 @@ public class WarehouseService {
         Warehouse warehouse = warehouseRepository.findWarehouseById(id)
                 .orElseThrow(()-> new WarehouseNotFoundException("Склад с номером "+id+" не был найден!"));
 
-        removeInfiniteNesting(warehouse);
+        //removeInfiniteNesting(warehouse);
 
         return warehouse;
     }
@@ -125,8 +124,8 @@ public class WarehouseService {
 //         }
      }
 
-    public void addWarehouse(Warehouse warehouse){
-         warehouseRepository.save(warehouse);
+    public void saveWarehouse(Warehouse warehouse){
+        warehouseRepository.save(warehouse);
     }
 
     public void deleteWarehouse(int id){

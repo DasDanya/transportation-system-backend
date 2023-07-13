@@ -12,8 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Getter
@@ -55,10 +54,10 @@ public class Responsible implements Serializable {
 
     //@JsonManagedReference
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "responsible")
-    private Set<Warehouse> warehouses = new HashSet<>();
+    private List<Warehouse> warehouses;
 
     @JsonIgnore
-    public Set<Warehouse> getWarehouses() {
+    public List<Warehouse> getWarehouses() {
         return warehouses;
     }
 }

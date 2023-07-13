@@ -1,10 +1,15 @@
 package ru.pin120.transystem.controllers;
 
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +19,7 @@ import ru.pin120.transystem.payload.response.MessageResponse;
 import ru.pin120.transystem.services.BindingService;
 import ru.pin120.transystem.services.ResponsibleService;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 
@@ -121,5 +127,20 @@ public class ResponsibleController {
 
         return new ResponseEntity<>(new MessageResponse("Ответственный успешно добавлен!"),HttpStatus.CREATED);
     }
-    
+
+
+    @GetMapping("/excel/{id}")
+    public ResponseEntity<Resource> generateReport(@PathVariable("id") int id){
+        String filename = "warehouses.xlsx";
+
+        ByteArrayInputStream actualData = responsibleService.generateReportInExcel(id);
+        InputStreamResource file = new InputStreamResource(actualData);
+
+        ResponseEntity<Resource> body =  ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename="+filename+"")
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+                .body(file);
+
+        return body;
+    }
 }
