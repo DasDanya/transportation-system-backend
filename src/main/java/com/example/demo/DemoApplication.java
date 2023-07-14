@@ -1,13 +1,13 @@
-package ru.pin120.transystem;
+package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TransystemApplication {
+public class DemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TransystemApplication.class, args);
+		SpringApplication.run(DemoApplication.class, args);
 	}
 
 }
