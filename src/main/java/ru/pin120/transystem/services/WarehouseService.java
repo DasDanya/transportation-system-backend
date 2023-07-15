@@ -52,33 +52,22 @@ public class WarehouseService {
             Warehouse warehouse = findWarehouseById(Integer.parseInt(value));
             warehouses.add(warehouse);
         }else{
+            Predicate<Warehouse> filter = null;
             switch(field){
                 case "state":
-                    warehouses = findAllWarehouses()
-                            .stream()
-                            .filter(w-> w.getAddress().getState().equals(value))
-                            .collect(Collectors.toList());
-                break;
+                    filter = w-> w.getAddress().getState().equals(value);
+                    break;
                 case "city":
-                    warehouses = findAllWarehouses()
-                            .stream()
-                            .filter(w->w.getAddress().getCity().equals(value))
-                            .collect(Collectors.toList());
+                    filter = w->w.getAddress().getCity().equals(value);
                     break;
                 case "street":
-                    warehouses = findAllWarehouses()
-                            .stream()
-                            .filter(w->w.getAddress().getStreet().equals(value))
-                            .collect(Collectors.toList());
+                    filter = w->w.getAddress().getStreet().equals(value);
                     break;
                 case "house":
-                    warehouses = findAllWarehouses()
-                            .stream()
-                            .filter(w->w.getAddress().getHouse().equals(value))
-                            .collect(Collectors.toList());
+                    filter = w->w.getAddress().getHouse().equals(value);
                     break;
                 case "responsible":
-                    Predicate<Warehouse> filter = w-> w.getResponsible() != null && w.getResponsible().getSurname().startsWith(value);
+                    filter = w-> w.getResponsible() != null && w.getResponsible().getSurname().startsWith(value);
 
                     long numberOfSpaces = value
                             .trim()
@@ -94,14 +83,13 @@ public class WarehouseService {
                             filter = w -> w.getResponsible() != null && w.getResponsible().getSurname().equals(responsible[0]) && w.getResponsible().getName().equals(responsible[1]) && w.getResponsible().getPatronymic().startsWith(responsible[2]);
                         }
                     }
-
-                    warehouses = findAllWarehouses()
-                            .stream()
-                            .filter(filter)
-                            .collect(Collectors.toList());
                     break;
-                default:
-                    warehouses = findAllWarehouses();
+            }
+            if(filter != null) {
+                warehouses = findAllWarehouses()
+                        .stream()
+                        .filter(filter)
+                        .collect(Collectors.toList());
             }
         }
 

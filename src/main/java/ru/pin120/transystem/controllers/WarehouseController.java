@@ -34,7 +34,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllWarehouses(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
+    public ResponseEntity<?> getWarehouses(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
         List<Warehouse> warehouses;
         try{
             if(field == null || value == null) {

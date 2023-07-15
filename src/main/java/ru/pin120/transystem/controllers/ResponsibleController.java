@@ -1,7 +1,6 @@
 package ru.pin120.transystem.controllers;
 
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.core.io.InputStreamResource;
@@ -38,7 +37,7 @@ public class ResponsibleController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllResponsibles(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
+    public ResponseEntity<?> getResponsibles(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
         List<Responsible> responsibles;
         try {
             if(field == null || value == null) {

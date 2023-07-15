@@ -10,8 +10,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+
 
 @Getter
 @Setter
@@ -30,17 +30,18 @@ public class Warehouse implements Serializable {
     @Valid
     private Address address;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "warehouse")
-    private Set<Product> products = new HashSet<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "actualWarehouse")
+    private List<Cargo> cargos;
+
 
     //@JsonBackReference
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="responsible_id")
     private Responsible responsible;
 
+    @JsonIgnore
+    public List<Cargo> getCargos() {
+        return cargos;
+    }
 
-//    @JsonIgnore
-//    public Responsible getResponsible() {
-//        return responsible;
-//    }
 }
