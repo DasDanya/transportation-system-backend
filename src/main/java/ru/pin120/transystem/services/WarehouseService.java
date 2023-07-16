@@ -1,12 +1,20 @@
 package ru.pin120.transystem.services;
 
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.pin120.transystem.exceptions.WarehouseNotFoundException;
+import ru.pin120.transystem.models.Cargo;
 import ru.pin120.transystem.models.Warehouse;
 import ru.pin120.transystem.repositories.WarehouseRepository;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -120,4 +128,57 @@ public class WarehouseService {
         warehouseRepository.deleteWarehouseById(id);
     }
 
+
+    public ByteArrayInputStream generateReportInExcel(int id){
+        Warehouse warehouse = findWarehouseById(id);
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Грузы");
+        Row row = sheet.createRow(0);
+
+        row.createCell(0).setCellValue("Название");
+        row.createCell(1).setCellValue("Категория");
+        row.createCell(2).setCellValue("Стоимость");
+        row.createCell(3).setCellValue("Количество");
+        row.createCell(4).setCellValue("Адрес отправки");
+        row.createCell(5).setCellValue("Адрес доставки");
+
+        int rowIndex = 1;
+
+        List<Cargo> cargos = warehouse.getCargos()
+                .stream()
+                .sorted(Comparator.comparing(Cargo::getName))
+                .collect(Collectors.toList());
+
+        for(Cargo cargo: cargos){
+            Row dataRow = sheet.createRow(rowIndex);
+
+            dataRow.createCell(0).setCellValue(cargo.getName());
+            dataRow.createCell(1).setCellValue(cargo.getCategory());
+            dataRow.createCell(2).setCellValue(cargo.getCost().toString());
+            dataRow.createCell(3).setCellValue(cargo.getCount());
+
+            String startAddress = cargo.getStartWarehouse().getAddress().getState() + ";" + cargo.getStartWarehouse().getAddress().getCity() +
+                    ";" + cargo.getStartWarehouse().getAddress().getStreet() + ";" + cargo.getStartWarehouse().getAddress().getHouse();
+
+            dataRow.createCell(4).setCellValue(startAddress);
+
+            String endAddress = cargo.getEndWarehouse().getAddress().getState() + ";" + cargo.getEndWarehouse().getAddress().getCity() +
+                    ";" + cargo.getEndWarehouse().getAddress().getStreet() + ";" + cargo.getEndWarehouse().getAddress().getHouse();
+
+            dataRow.createCell(5).setCellValue(endAddress);
+
+            rowIndex++;
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            workbook.write(out);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return new ByteArrayInputStream(out.toByteArray());
+    }
 }
