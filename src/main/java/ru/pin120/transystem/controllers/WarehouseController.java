@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.pin120.transystem.models.Responsible;
@@ -34,6 +35,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR') or hasRole('USER')")
     public ResponseEntity<?> getWarehouses(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
         List<Warehouse> warehouses;
         try{
@@ -50,6 +52,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getDeleteWarehouse(@PathVariable("id") int id){
         Warehouse warehouse;
         try{
@@ -62,6 +65,7 @@ public class WarehouseController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ResponseEntity<?> deleteWarehouse(@PathVariable("id") int id){
         try{
@@ -74,6 +78,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> getUpdateWarehouse(@PathVariable("id") int id){
         WarehouseWithResponsibles warehouseWithResponsibles;
         try{
@@ -90,6 +95,7 @@ public class WarehouseController {
     }
 
     @PutMapping("/update")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> updateWarehouse(@RequestBody @Valid Warehouse warehouse, BindingResult bindingResult){
         if(bindingResult.hasErrors()) {
             return new ResponseEntity(new MessageResponse(bindingService.getErrors(bindingResult)), HttpStatus.BAD_REQUEST);
@@ -103,6 +109,7 @@ public class WarehouseController {
         return new ResponseEntity<>(new MessageResponse("Данные о складе успешно обновлены!"), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     private ResponseEntity<?> handlingSaveException(Exception exception){
         String errorMessage = exception.getMessage();
         if(exception instanceof DataIntegrityViolationException){
@@ -112,6 +119,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAddWarehouse(){
         List<Responsible> responsibles;
         try{
@@ -125,6 +133,7 @@ public class WarehouseController {
 
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addWarehouse(@RequestBody @Valid Warehouse warehouse, BindingResult bindingResult){
 
         if(bindingResult.hasErrors()) {

@@ -38,6 +38,7 @@ public class ResponsibleController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR') or hasRole('USER')")
     public ResponseEntity<?> getResponsibles(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
         List<Responsible> responsibles;
         try {
@@ -60,6 +61,7 @@ public class ResponsibleController {
     }
 
     @DeleteMapping("delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ResponseEntity<?> deleteResponsible(@PathVariable("id") int id){
         try{
@@ -71,6 +73,7 @@ public class ResponsibleController {
         return new ResponseEntity<>(new MessageResponse("Ответственный успешно удален!"),HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     private ResponseEntity<?> findResponsibleById(int id){
         Responsible responsible;
         try{
@@ -83,11 +86,13 @@ public class ResponsibleController {
     }
 
     @GetMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> getUpdateResponsible(@PathVariable("id") int id){
        return findResponsibleById(id);
     }
 
     @PutMapping("/update")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> updateResponsible(@RequestPart("responsible") @Valid Responsible responsible, BindingResult bindingResult,
                                                @RequestPart(value = "photo",required = false) MultipartFile photo){
 
@@ -103,7 +108,7 @@ public class ResponsibleController {
         return new ResponseEntity<>(new MessageResponse("Данные об ответственном успешно обновлены!"),HttpStatus.OK);
     }
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     private ResponseEntity<?> handlingSaveException(Exception exception){
         String errorMessage = exception.getMessage();
         if(exception instanceof DataIntegrityViolationException){
@@ -113,6 +118,7 @@ public class ResponsibleController {
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addResponsible(@RequestPart("responsible") @Valid Responsible responsible, BindingResult bindingResult,
                                             @RequestPart("photo") MultipartFile photo){
 
@@ -131,6 +137,7 @@ public class ResponsibleController {
 
 
     @GetMapping("/excel/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<Resource> generateReport(@PathVariable("id") int id){
         String filename = "warehouses.xlsx";
 

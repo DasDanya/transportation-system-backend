@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +36,7 @@ public class CargoController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR') or hasRole('USER')")
     public ResponseEntity<?> getCargos(@RequestParam(value = "field",required = false) String field,
                                        @RequestParam(value="value", required = false) String value,
                                        @RequestParam(value="conditional",required = false) String conditional){
@@ -58,6 +60,7 @@ public class CargoController {
 
 
     @GetMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> getDeleteCargo(@PathVariable("id") int id){
         Cargo cargo;
         try{
@@ -69,6 +72,7 @@ public class CargoController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     @Transactional
     public ResponseEntity<?> deleteCargo(@PathVariable("id") int id){
         try{
@@ -81,6 +85,7 @@ public class CargoController {
     }
 
     @GetMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> getUpdateCargo(@PathVariable("id") int id){
         CargoWithWarehouses cargoWithWarehouses;
         try{
@@ -97,6 +102,7 @@ public class CargoController {
     }
 
     @PutMapping("/update")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> updateCargo(@RequestPart("cargo") @Valid Cargo cargo, BindingResult bindingResult,
                                          @RequestPart(value = "photos",required = false) List<MultipartFile> photos){
 
@@ -113,6 +119,7 @@ public class CargoController {
     }
 
     @GetMapping("/add")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> getAddCargo(){
         List<Warehouse> warehouses;
         try{
@@ -125,6 +132,7 @@ public class CargoController {
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<?> addCargo(@RequestPart("cargo") @Valid Cargo cargo, BindingResult bindingResult,
                                       @RequestPart(value = "photos") List<MultipartFile> photos){
 
