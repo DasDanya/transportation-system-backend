@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 public class CargoService {
 
     private final CargoRepository cargoRepository;
-
     private final FileService fileService;
 
     public CargoService(CargoRepository cargoRepository, FileService fileService) {
@@ -161,5 +160,15 @@ public class CargoService {
 
     public void deleteCargo(int id){
         cargoRepository.deleteCargoById(id);
+    }
+
+    public void updateCargo(Cargo cargo, List<MultipartFile> photos) throws Exception {
+        if(photos != null){
+            setCargoPhotos(cargo,photos);
+        }else{
+            Cargo updatedCargo = findCargoById(cargo.getId());
+            cargo.setPhotos(updatedCargo.getPhotos());
+        }
+        cargoRepository.save(cargo);
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.pin120.transystem.models.Cargo;
 import ru.pin120.transystem.models.Warehouse;
 import ru.pin120.transystem.payload.response.MessageResponse;
+import ru.pin120.transystem.sendModels.CargoWithWarehouses;
 import ru.pin120.transystem.services.BindingService;
 import ru.pin120.transystem.services.CargoService;
 import ru.pin120.transystem.services.WarehouseService;
@@ -79,6 +80,38 @@ public class CargoController {
         return new ResponseEntity<>(new MessageResponse("Груз успешно удален!"), HttpStatus.OK);
     }
 
+    @GetMapping("/update/{id}")
+    public ResponseEntity<?> getUpdateCargo(@PathVariable("id") int id){
+        CargoWithWarehouses cargoWithWarehouses;
+        try{
+            Cargo cargo = cargoService.findCargoById(id);
+            List<Warehouse> warehouses = warehouseService.findAllWarehouses();
+
+            cargoWithWarehouses = new CargoWithWarehouses(cargo,warehouses);
+
+        }catch(Exception e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(cargoWithWarehouses, HttpStatus.OK);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateCargo(@RequestPart("cargo") @Valid Cargo cargo, BindingResult bindingResult,
+                                         @RequestPart(value = "photos",required = false) List<MultipartFile> photos){
+
+        if(bindingResult.hasErrors()) {
+            return new ResponseEntity(new MessageResponse(bindingService.getErrors(bindingResult)), HttpStatus.BAD_REQUEST);
+        }
+        try{
+            cargoService.updateCargo(cargo,photos);
+        }catch (Exception e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(new MessageResponse("Данные о грузе успешно обновлены!"), HttpStatus.OK);
+    }
+
     @GetMapping("/add")
     public ResponseEntity<?> getAddCargo(){
         List<Warehouse> warehouses;
@@ -93,7 +126,7 @@ public class CargoController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addCargo(@RequestPart("cargo") @Valid Cargo cargo, BindingResult bindingResult,
-                                      @RequestPart("photos") List<MultipartFile> photos){
+                                      @RequestPart(value = "photos") List<MultipartFile> photos){
 
         if(bindingResult.hasErrors()) {
             return new ResponseEntity(new MessageResponse(bindingService.getErrors(bindingResult)), HttpStatus.BAD_REQUEST);

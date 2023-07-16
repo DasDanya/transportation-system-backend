@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class Cargo {
     @JoinColumn(name="end_warehouse_id", nullable = false)
     private Warehouse endWarehouse;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
     @JoinColumn(name="cargo_id",nullable = false)
     List<CargoPhoto> photos;
 
