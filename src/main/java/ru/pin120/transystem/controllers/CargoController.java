@@ -1,6 +1,7 @@
 package ru.pin120.transystem.controllers;
 
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/cargo")
+@Tag(name="CargoController",description = "Контроллер для работы с данными о грузах")
 public class CargoController {
 
     private final CargoService cargoService;
@@ -37,6 +39,7 @@ public class CargoController {
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR') or hasRole('USER')")
+    @Tag(name="getCargos",description = "Получение списка грузов")
     public ResponseEntity<?> getCargos(@RequestParam(value = "field",required = false) String field,
                                        @RequestParam(value="value", required = false) String value,
                                        @RequestParam(value="conditional",required = false) String conditional){
@@ -61,6 +64,7 @@ public class CargoController {
 
     @GetMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="getDeleteCargo",description = "Получение удаляемого груза")
     public ResponseEntity<?> getDeleteCargo(@PathVariable("id") int id){
         Cargo cargo;
         try{
@@ -73,6 +77,7 @@ public class CargoController {
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="deleteCargo",description = "Удаление груза")
     @Transactional
     public ResponseEntity<?> deleteCargo(@PathVariable("id") int id){
         try{
@@ -86,6 +91,7 @@ public class CargoController {
 
     @GetMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="getUpdateCargo",description = "Получение изменяемого груза")
     public ResponseEntity<?> getUpdateCargo(@PathVariable("id") int id){
         CargoWithWarehouses cargoWithWarehouses;
         try{
@@ -103,6 +109,7 @@ public class CargoController {
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="updateCargo",description = "Изменение данных о грузе")
     public ResponseEntity<?> updateCargo(@RequestPart("cargo") @Valid Cargo cargo, BindingResult bindingResult,
                                          @RequestPart(value = "photos",required = false) List<MultipartFile> photos){
 
@@ -120,6 +127,7 @@ public class CargoController {
 
     @GetMapping("/add")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="getAddCargo",description = "Получение данных,необходимых для создания груза")
     public ResponseEntity<?> getAddCargo(){
         List<Warehouse> warehouses;
         try{
@@ -133,6 +141,7 @@ public class CargoController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="addCargo",description = "Добавление груза")
     public ResponseEntity<?> addCargo(@RequestPart("cargo") @Valid Cargo cargo, BindingResult bindingResult,
                                       @RequestPart(value = "photos") List<MultipartFile> photos){
 

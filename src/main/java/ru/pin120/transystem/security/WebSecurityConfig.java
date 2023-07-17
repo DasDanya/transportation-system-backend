@@ -64,6 +64,7 @@ public class WebSecurityConfig{
                                 .requestMatchers("/api/responsible/**").permitAll()
                                 .requestMatchers("/api/warehouse/**").permitAll()
                                 .requestMatchers("/api/cargo/**").permitAll()
+                                .requestMatchers("/**").permitAll() // permit all the routers after swagger-ui.html
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());

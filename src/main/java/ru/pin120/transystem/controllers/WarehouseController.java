@@ -1,6 +1,7 @@
 package ru.pin120.transystem.controllers;
 
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.core.io.InputStreamResource;
@@ -27,6 +28,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/warehouse")
+@Tag(name="WarehouseController",description = "Контроллер для работы с данными о cкладах")
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
@@ -41,6 +43,7 @@ public class WarehouseController {
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR') or hasRole('USER')")
+    @Tag(name="getWarehouses",description = "Получение списка складов")
     public ResponseEntity<?> getWarehouses(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
         List<Warehouse> warehouses;
         try{
@@ -58,6 +61,7 @@ public class WarehouseController {
 
     @GetMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Tag(name="getDeleteWarehouse",description = "Получение удаляемого склада")
     public ResponseEntity<?> getDeleteWarehouse(@PathVariable("id") int id){
         Warehouse warehouse;
         try{
@@ -71,6 +75,7 @@ public class WarehouseController {
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Tag(name="deleteWarehouse",description = "Удаление склада")
     @Transactional
     public ResponseEntity<?> deleteWarehouse(@PathVariable("id") int id){
         try{
@@ -84,6 +89,7 @@ public class WarehouseController {
 
     @GetMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="getUpdateWarehouse",description = "Получение изменяемого склада")
     public ResponseEntity<?> getUpdateWarehouse(@PathVariable("id") int id){
         WarehouseWithResponsibles warehouseWithResponsibles;
         try{
@@ -101,6 +107,7 @@ public class WarehouseController {
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="updateWarehouse",description = "Изменение данных о складе")
     public ResponseEntity<?> updateWarehouse(@RequestBody @Valid Warehouse warehouse, BindingResult bindingResult){
         if(bindingResult.hasErrors()) {
             return new ResponseEntity(new MessageResponse(bindingService.getErrors(bindingResult)), HttpStatus.BAD_REQUEST);
@@ -115,6 +122,7 @@ public class WarehouseController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="handlingSaveException",description = "Получение сообщения об ошибки при сохранении данных о складе")
     private ResponseEntity<?> handlingSaveException(Exception exception){
         String errorMessage = exception.getMessage();
         if(exception instanceof DataIntegrityViolationException){
@@ -125,6 +133,7 @@ public class WarehouseController {
 
     @GetMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
+    @Tag(name="getAddWarehouse",description = "Получение данных,необходимых для создания склада")
     public ResponseEntity<?> getAddWarehouse(){
         List<Responsible> responsibles;
         try{
@@ -139,6 +148,7 @@ public class WarehouseController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
+    @Tag(name="addWarehouse",description = "Создание склада")
     public ResponseEntity<?> addWarehouse(@RequestBody @Valid Warehouse warehouse, BindingResult bindingResult){
 
         if(bindingResult.hasErrors()) {
@@ -156,6 +166,7 @@ public class WarehouseController {
 
     @GetMapping("excel/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="generateReport",description = "Создание excel-файла с данными о грузах, находящихся в указанном складе")
     public ResponseEntity<Resource> generateReport(@PathVariable("id") int id){
         String filename = "cargos.xlsx";
 

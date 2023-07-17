@@ -1,6 +1,10 @@
 package ru.pin120.transystem.controllers;
 
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,7 +38,18 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
-
+@Tag(name="AuthController",description = "Контроллер для регистрации и авторизации пользователей")
+@OpenAPIDefinition(
+        info = @Info(
+                title="Backend для складской части системы грузоперевозок",
+                version = "1.0.0",
+                description = "Ниже описаны контроллеры и их методы",
+                contact = @Contact(
+                        name = "Климачков Даниил",
+                        email = "klimachkov.danilka@mail.ru"
+                )
+        )
+)
 public class AuthController {
 
     @Autowired
@@ -56,6 +71,7 @@ public class AuthController {
     BindingService bindingService;
 
     @PostMapping("/signup")
+    @Tag(name="registerUser",description = "Регистрация пользователя")
     public ResponseEntity<?> registerUser(@RequestBody @Valid SignupRequest signupRequest, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             return ResponseEntity.badRequest().body(new MessageResponse(bindingService.getErrors(bindingResult)));
@@ -111,6 +127,7 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
+    @Tag(name="authenticateUser",description = "Авторизация пользователя")
     public ResponseEntity<?> authenticateUser(@RequestBody @Valid LoginRequest loginRequest,BindingResult bindingResult){
 
         if(bindingResult.hasErrors()){

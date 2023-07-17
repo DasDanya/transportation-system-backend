@@ -1,6 +1,7 @@
 package ru.pin120.transystem.controllers;
 
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.core.io.InputStreamResource;
@@ -27,6 +28,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/responsible")
+@Tag(name="ResponsibleController",description = "Контроллер для работы с данными об ответственых лицах")
 public class ResponsibleController {
 
     private final ResponsibleService responsibleService;
@@ -39,6 +41,7 @@ public class ResponsibleController {
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR') or hasRole('USER')")
+    @Tag(name="getResponsibles",description = "Получение списка ответственных")
     public ResponseEntity<?> getResponsibles(@RequestParam(value = "field",required = false) String field, @RequestParam(value="value", required = false) String value){
         List<Responsible> responsibles;
         try {
@@ -56,12 +59,14 @@ public class ResponsibleController {
 
     @GetMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Tag(name="getDeleteResponsible",description = "Получение удаляемого ответственного")
     public ResponseEntity<?> getDeleteResponsible(@PathVariable("id") int id){
         return findResponsibleById(id);
     }
 
     @DeleteMapping("delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Tag(name="deleteResponsible",description = "Удаление ответственного")
     @Transactional
     public ResponseEntity<?> deleteResponsible(@PathVariable("id") int id){
         try{
@@ -74,6 +79,7 @@ public class ResponsibleController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="findResponsibleById",description = "Получение ответственного")
     private ResponseEntity<?> findResponsibleById(int id){
         Responsible responsible;
         try{
@@ -87,12 +93,14 @@ public class ResponsibleController {
 
     @GetMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="getUpdateResponsible",description = "Получение изменяемого ответственного")
     public ResponseEntity<?> getUpdateResponsible(@PathVariable("id") int id){
        return findResponsibleById(id);
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="updateResponsible",description = "Изменение данных об ответственном")
     public ResponseEntity<?> updateResponsible(@RequestPart("responsible") @Valid Responsible responsible, BindingResult bindingResult,
                                                @RequestPart(value = "photo",required = false) MultipartFile photo){
 
@@ -109,6 +117,7 @@ public class ResponsibleController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="handlingSaveException",description = "Получение сообщения об ошибки при сохранении данных об ответственном")
     private ResponseEntity<?> handlingSaveException(Exception exception){
         String errorMessage = exception.getMessage();
         if(exception instanceof DataIntegrityViolationException){
@@ -119,6 +128,7 @@ public class ResponsibleController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
+    @Tag(name="addResponsible",description = "Добавление ответственного")
     public ResponseEntity<?> addResponsible(@RequestPart("responsible") @Valid Responsible responsible, BindingResult bindingResult,
                                             @RequestPart("photo") MultipartFile photo){
 
@@ -138,6 +148,7 @@ public class ResponsibleController {
 
     @GetMapping("/excel/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Tag(name="generateReport",description = "Получение excel файла с данными о складах ответственного")
     public ResponseEntity<Resource> generateReport(@PathVariable("id") int id){
         String filename = "warehouses.xlsx";
 
